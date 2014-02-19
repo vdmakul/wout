@@ -1,11 +1,50 @@
 package lv.vdm.wout.domain.body;
 
-import java.util.List;
+import lv.vdm.wout.domain.Media;
 
+import javax.persistence.*;
+import java.util.Collection;
+
+@Entity
 public class Muscle {
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Column(unique = true)
+    private String uniqueCode;
+
     private String name;
-    private List<Muscle> medias;
+    @Transient
+    private Collection<Media> medias; //todo
+
+    @ManyToOne
+    @JoinColumn(name = "bodypart_id", nullable = false)
     private BodyPart bodyPart;
+
+    protected Muscle() {
+    }
+
+    public Muscle(String uniqueCode, String name) {
+        this.uniqueCode = uniqueCode;
+        this.name = name;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUniqueCode() {
+        return uniqueCode;
+    }
+
+    public void setUniqueCode(String uniqueCode) {
+        this.uniqueCode = uniqueCode;
+    }
 
     public String getName() {
         return name;
@@ -15,11 +54,11 @@ public class Muscle {
         this.name = name;
     }
 
-    public List<Muscle> getMedias() {
+    public Collection<Media> getMedias() {
         return medias;
     }
 
-    public void setMedias(List<Muscle> medias) {
+    public void setMedias(Collection<Media> medias) {
         this.medias = medias;
     }
 
