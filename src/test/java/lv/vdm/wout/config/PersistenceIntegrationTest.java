@@ -1,6 +1,7 @@
 package lv.vdm.wout.config;
 
 import lv.vdm.wout.App;
+import lv.vdm.wout.domain.Media;
 import lv.vdm.wout.domain.body.BodyPart;
 import lv.vdm.wout.domain.body.Muscle;
 import lv.vdm.wout.domain.body.MuscleUtilisation;
@@ -37,6 +38,9 @@ public class PersistenceIntegrationTest {
     private BodyPartRepository bodyPartRepo;
     @Autowired
     private MuscleUtilisationRepository muscleUtilisationRepo;
+    @Autowired
+    private MediaRepository mediaRepo;
+
 
     @After
     public void tearDown() throws Exception {
@@ -107,4 +111,40 @@ public class PersistenceIntegrationTest {
         assertEquals(1, muscleUtilisationRepo.findByMuscle(biceps).size());
         assertEquals(1, muscleUtilisationRepo.findByMuscleUniqueCode("biceps").size());
     }
+
+    @Test
+    public void thatMuscleLinksMedia() {
+        Media image = new Media("image", "http://image.com/image.png", "image/png");
+        mediaRepo.save(image);
+
+        BodyPart arm = new BodyPart("arm", "Arm");
+        bodyPartRepo.save(arm);
+
+        Muscle biceps = new Muscle("biceps", "Biceps");
+        biceps.link(image);
+        biceps.setBodyPart(arm);
+        muscleRepo.save(biceps);
+
+        Media media = muscleRepo.findByUniqueCode("biceps").getMedias().iterator().next();
+        assertEquals("image", media.getName());
+        assertEquals("http://image.com/image.png", media.getUrl());
+        assertEquals("image/png", media.getContentType());
+    }
+
+    @Test
+    public void thatInventoryLinksMedia() {
+        Media image = new Media("image", "http://image.com/image.png", "image/png");
+        mediaRepo.save(image);
+
+        Inventory perekladina = new Inventory("perekladina", "Perekladina");
+        perekladina.link(image);
+        inventoryRepo.save(perekladina);
+
+        Media media = inventoryRepo.findByUniqueCode("perekladina").getMedias().iterator().next();
+        assertEquals("image", media.getName());
+        assertEquals("http://image.com/image.png", media.getUrl());
+        assertEquals("image/png", media.getContentType());
+    }
+
 }
+

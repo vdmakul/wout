@@ -4,6 +4,8 @@ import lv.vdm.wout.domain.Media;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Inventory {
@@ -19,8 +21,11 @@ public class Inventory {
 
     private String description;
 
-    @Transient
-    private Collection<Media> medias;
+    @ManyToMany(fetch = FetchType.EAGER) //todo howto remove eager and keep test working?
+    @JoinTable(name = "inventory_media",
+            joinColumns = @JoinColumn(name = "inventory_id"),
+            inverseJoinColumns = @JoinColumn(name = "media_id"))
+    private Set<Media> medias = new HashSet<>();
 
     @ManyToMany(mappedBy = "requiredInventories")
     private Collection<Exercise> exercises;
@@ -31,6 +36,10 @@ public class Inventory {
     public Inventory(String uniqueCode, String name) {
         this.uniqueCode = uniqueCode;
         this.name = name;
+    }
+
+    public void link(Media media) {
+        getMedias().add(media);
     }
 
     public Long getId() {
@@ -65,11 +74,11 @@ public class Inventory {
         this.description = description;
     }
 
-    public Collection<Media> getMedias() {
+    public Set<Media> getMedias() {
         return medias;
     }
 
-    public void setMedias(Collection<Media> medias) {
+    public void setMedias(Set<Media> medias) {
         this.medias = medias;
     }
 

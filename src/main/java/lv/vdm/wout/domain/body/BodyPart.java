@@ -14,9 +14,6 @@ public class BodyPart {
 
     private String name;
 
-    @Transient
-    private BodyPart placement; //todo
-
     //todo remove EAGER and configure OpenSessionInViewFilter for view generation?
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "bodyPart", fetch = FetchType.EAGER)
     private Collection<Muscle> muscles;
@@ -55,14 +52,6 @@ public class BodyPart {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public BodyPart getPlacement() {
-        return placement;
-    }
-
-    public void setPlacement(BodyPart placement) {
-        this.placement = placement;
     }
 
     public Collection<Muscle> getMuscles() {

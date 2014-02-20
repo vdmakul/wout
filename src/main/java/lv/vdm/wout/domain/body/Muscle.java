@@ -3,7 +3,8 @@ package lv.vdm.wout.domain.body;
 import lv.vdm.wout.domain.Media;
 
 import javax.persistence.*;
-import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Muscle {
@@ -15,8 +16,12 @@ public class Muscle {
     private String uniqueCode;
 
     private String name;
-    @Transient
-    private Collection<Media> medias; //todo
+
+    @ManyToMany(fetch = FetchType.EAGER) //todo howto remove eager and keep test working?
+    @JoinTable(name = "muscle_media",
+            joinColumns = @JoinColumn(name = "muscle_id"),
+            inverseJoinColumns = @JoinColumn(name = "media_id"))
+    private Set<Media> medias = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "bodypart_id", nullable = false)
@@ -28,6 +33,10 @@ public class Muscle {
     public Muscle(String uniqueCode, String name) {
         this.uniqueCode = uniqueCode;
         this.name = name;
+    }
+
+    public void link(Media media) {
+        getMedias().add(media);
     }
 
     public Long getId() {
@@ -54,11 +63,11 @@ public class Muscle {
         this.name = name;
     }
 
-    public Collection<Media> getMedias() {
+    public Set<Media> getMedias() {
         return medias;
     }
 
-    public void setMedias(Collection<Media> medias) {
+    public void setMedias(Set<Media> medias) {
         this.medias = medias;
     }
 
@@ -68,5 +77,22 @@ public class Muscle {
 
     public void setBodyPart(BodyPart bodyPart) {
         this.bodyPart = bodyPart;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Muscle muscle = (Muscle) o;
+
+        if (uniqueCode != null ? !uniqueCode.equals(muscle.uniqueCode) : muscle.uniqueCode != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return uniqueCode != null ? uniqueCode.hashCode() : 0;
     }
 }
