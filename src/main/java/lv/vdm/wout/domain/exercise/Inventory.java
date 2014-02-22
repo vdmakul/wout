@@ -3,7 +3,6 @@ package lv.vdm.wout.domain.exercise;
 import lv.vdm.wout.domain.Media;
 
 import javax.persistence.*;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,8 +27,9 @@ public class Inventory {
     private Set<Media> medias = new HashSet<>();
 
     @ManyToMany(mappedBy = "requiredInventories")
-    private Collection<Exercise> exercises;
+    private Set<Exercise> exercises = new HashSet<>();
 
+    @SuppressWarnings("unused")
     protected Inventory() {
     }
 
@@ -82,11 +82,11 @@ public class Inventory {
         this.medias = medias;
     }
 
-    public Collection<Exercise> getExercises() {
+    public Set<Exercise> getExercises() {
         return exercises;
     }
 
-    public void setExercises(Collection<Exercise> exercises) {
+    public void setExercises(Set<Exercise> exercises) {
         this.exercises = exercises;
     }
 }

@@ -27,12 +27,18 @@ public class Muscle {
     @JoinColumn(name = "bodypart_id", nullable = false)
     private BodyPart bodyPart;
 
+    @SuppressWarnings("unused")
     protected Muscle() {
     }
 
-    public Muscle(String uniqueCode, String name) {
+    public Muscle(String uniqueCode, BodyPart bodyPart) {
+        this(uniqueCode, uniqueCode, bodyPart);
+    }
+
+    public Muscle(String uniqueCode, String name, BodyPart bodyPart) {
         this.uniqueCode = uniqueCode;
         this.name = name;
+        this.bodyPart = bodyPart;
     }
 
     public void link(Media media) {

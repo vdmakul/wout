@@ -54,23 +54,17 @@ public class PersistenceIntegrationTest {
 
     @Test
     public void thatExerciseInventoryWorks() {
-        Inventory perekladina = new Inventory("perekladina", "Perekladina");
-        Inventory ruki = new Inventory("ruki", "Ruki");
-
-        inventoryRepo.save(perekladina);
-        inventoryRepo.save(ruki);
+        Inventory chinupBar = new Inventory("chinup_bar", "Chin-up bar");
+        inventoryRepo.save(chinupBar);
 
         Exercise jogging = new Exercise("jogging", "Jogging", TechnicalLevel.NOVICE, ExerciseClass.CARDIO);
         Exercise running = new Exercise("running", "Running", TechnicalLevel.NOVICE, ExerciseClass.CARDIO);
-        Exercise podtjagivanie = new Exercise("podtjagivanie", "Podtjagivanie", TechnicalLevel.NOVICE, ExerciseClass.BASE);
-        podtjagivanie.setRequiredInventories(new ArrayList<Inventory>());
-        podtjagivanie.requires(perekladina);
-        podtjagivanie.requires(ruki);
+        Exercise chinUp = new Exercise("chinup", "Chin-up", TechnicalLevel.NOVICE, ExerciseClass.BASE);
+        chinUp.requires(chinupBar);
 
         exerciseRepo.save(jogging);
         exerciseRepo.save(running);
-        exerciseRepo.save(podtjagivanie);
-
+        exerciseRepo.save(chinUp);
 
         List<Exercise> exercises = new ArrayList<>();
         for (Exercise exercise : exerciseRepo.findAll()) {
@@ -86,7 +80,7 @@ public class PersistenceIntegrationTest {
         BodyPart arm = new BodyPart("arm", "Arm");
         bodyPartRepo.save(arm);
 
-        Muscle biceps = new Muscle("biceps", "Biceps");
+        Muscle biceps = new Muscle("biceps", arm);
         biceps.setBodyPart(arm);
         muscleRepo.save(biceps);
 
@@ -101,7 +95,7 @@ public class PersistenceIntegrationTest {
         BodyPart arm = new BodyPart("arm", "Arm");
         bodyPartRepo.save(arm);
 
-        Muscle biceps = new Muscle("biceps", "Biceps");
+        Muscle biceps = new Muscle("biceps", arm);
         biceps.setBodyPart(arm);
         muscleRepo.save(biceps);
 
@@ -120,7 +114,7 @@ public class PersistenceIntegrationTest {
         BodyPart arm = new BodyPart("arm", "Arm");
         bodyPartRepo.save(arm);
 
-        Muscle biceps = new Muscle("biceps", "Biceps");
+        Muscle biceps = new Muscle("biceps", arm);
         biceps.link(image);
         biceps.setBodyPart(arm);
         muscleRepo.save(biceps);
@@ -136,14 +130,29 @@ public class PersistenceIntegrationTest {
         Media image = new Media("image", "http://image.com/image.png", "image/png");
         mediaRepo.save(image);
 
-        Inventory perekladina = new Inventory("perekladina", "Perekladina");
-        perekladina.link(image);
-        inventoryRepo.save(perekladina);
+        Inventory chinupBar = new Inventory("chinup_bar", "Chin-up bar");
+        chinupBar.link(image);
+        inventoryRepo.save(chinupBar);
 
-        Media media = inventoryRepo.findByUniqueCode("perekladina").getMedias().iterator().next();
+        Media media = inventoryRepo.findByUniqueCode("chinup_bar").getMedias().iterator().next();
         assertEquals("image", media.getName());
         assertEquals("http://image.com/image.png", media.getUrl());
         assertEquals("image/png", media.getContentType());
+    }
+
+    @Test
+    public void thatExerciseHasMuscleUtilization() {
+        BodyPart torso = new BodyPart("torso", "Torso");
+        bodyPartRepo.save(torso);
+
+        Muscle cardiac = new Muscle("cardiac", torso);
+        muscleRepo.save(cardiac);
+
+        Exercise jogging = new Exercise("jogging", "Jogging", TechnicalLevel.NOVICE, ExerciseClass.CARDIO);
+        jogging.utilizes(new MuscleUtilisation(cardiac, UtilisationLevel.SUPPORTING));
+        exerciseRepo.save(jogging);
+
+        assertEquals(1, exerciseRepo.findByUniqueCode("jogging").getMuscleUtilisations().size());
     }
 
 }

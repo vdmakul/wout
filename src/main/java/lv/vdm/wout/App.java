@@ -22,7 +22,6 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
 
 @Configuration
 @EnableAutoConfiguration
@@ -72,7 +71,6 @@ public class App {
         Exercise jogging = new Exercise("jogging", "Jogging", TechnicalLevel.NOVICE, ExerciseClass.CARDIO);
         Exercise running = new Exercise("running", "Running", TechnicalLevel.NOVICE, ExerciseClass.CARDIO);
         Exercise podtjagivanie = new Exercise("podtjagivanie", "Podtjagivanie", TechnicalLevel.NOVICE, ExerciseClass.BASE);
-        podtjagivanie.setRequiredInventories(new ArrayList<Inventory>());
         podtjagivanie.requires(perekladina);
         podtjagivanie.requires(ruki);
 

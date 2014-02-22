@@ -1,7 +1,8 @@
 package lv.vdm.wout.domain.body;
 
 import javax.persistence.*;
-import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class BodyPart {
@@ -16,8 +17,9 @@ public class BodyPart {
 
     //todo remove EAGER and configure OpenSessionInViewFilter for view generation?
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "bodyPart", fetch = FetchType.EAGER)
-    private Collection<Muscle> muscles;
+    private Set<Muscle> muscles = new HashSet<>();
 
+    @SuppressWarnings("unused")
     protected BodyPart() {
     }
 
@@ -54,11 +56,11 @@ public class BodyPart {
         this.name = name;
     }
 
-    public Collection<Muscle> getMuscles() {
+    public Set<Muscle> getMuscles() {
         return muscles;
     }
 
-    public void setMuscles(Collection<Muscle> muscles) {
+    public void setMuscles(Set<Muscle> muscles) {
         this.muscles = muscles;
     }
 }
