@@ -1,6 +1,7 @@
 package lv.vdm.wout.config;
 
 import lv.vdm.wout.App;
+import lv.vdm.wout.domain.Difficulty;
 import lv.vdm.wout.domain.Media;
 import lv.vdm.wout.domain.body.BodyPart;
 import lv.vdm.wout.domain.body.Muscle;
@@ -10,6 +11,9 @@ import lv.vdm.wout.domain.exercise.Exercise;
 import lv.vdm.wout.domain.exercise.ExerciseClass;
 import lv.vdm.wout.domain.exercise.Inventory;
 import lv.vdm.wout.domain.exercise.TechnicalLevel;
+import lv.vdm.wout.domain.training.ExerciseDetails;
+import lv.vdm.wout.domain.training.Training;
+import lv.vdm.wout.domain.training.Workout;
 import lv.vdm.wout.repository.*;
 import org.junit.After;
 import org.junit.Test;
@@ -19,7 +23,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertEquals;
@@ -40,11 +46,20 @@ public class PersistenceIntegrationTest {
     private MuscleUtilisationRepository muscleUtilisationRepo;
     @Autowired
     private MediaRepository mediaRepo;
+    @Autowired
+    private TrainingRepository trainingRepo;
+    @Autowired
+    private WorkoutRepository workoutRepo;
+    @Autowired
+    private ExerciseDetailsRepository exerciseDetailsRepo;
 
 
     @After
     public void tearDown() throws Exception {
         //order matters
+        exerciseDetailsRepo.deleteAll();
+        workoutRepo.deleteAll();
+        trainingRepo.deleteAll();
         exerciseRepo.deleteAll();
         inventoryRepo.deleteAll();
         muscleUtilisationRepo.deleteAll();
@@ -92,6 +107,9 @@ public class PersistenceIntegrationTest {
 
     @Test
     public void thatMuscleUtilisationWorks() {
+        Exercise jogging = new Exercise("jogging", "Jogging", TechnicalLevel.NOVICE, ExerciseClass.CARDIO);
+        exerciseRepo.save(jogging);
+
         BodyPart arm = new BodyPart("arm", "Arm");
         bodyPartRepo.save(arm);
 
@@ -100,6 +118,7 @@ public class PersistenceIntegrationTest {
         muscleRepo.save(biceps);
 
         MuscleUtilisation mu = new MuscleUtilisation(biceps, UtilisationLevel.MEDIUM);
+        mu.setExercise(jogging);
         muscleUtilisationRepo.save(mu);
 
         assertEquals(1, muscleUtilisationRepo.findByMuscle(biceps).size());
@@ -153,6 +172,63 @@ public class PersistenceIntegrationTest {
         exerciseRepo.save(jogging);
 
         assertEquals(1, exerciseRepo.findByUniqueCode("jogging").getMuscleUtilisations().size());
+    }
+
+    @Test
+    public void thatTrainingWorks() {
+        Date startTime = new Date(123456789);
+        Date endTime = new Date(987654321);
+        Training training = new Training(null, startTime);
+        training.setDifficulty(Difficulty.EASY);
+        training.setComments("comments");
+        training.setEndTime(endTime);
+        trainingRepo.save(training);
+
+        Exercise jogging = new Exercise("jogging", "Jogging", TechnicalLevel.NOVICE, ExerciseClass.CARDIO);
+        exerciseRepo.save(jogging);
+
+        Workout workout = new Workout(jogging);
+        workout.setDifficulty(Difficulty.NORMAL);
+        ExerciseDetails exerciseDetails = new ExerciseDetails(workout);
+        exerciseDetails.setDifficulty(Difficulty.EASY);
+        exerciseDetails.setComments("details comments");
+        exerciseDetails.setWeight(1d);
+        exerciseDetails.setRepCount(2);
+        exerciseDetails.setDistance(3d);
+        exerciseDetails.setExecutionDuration(4);
+        exerciseDetails.setDurationOfRest(5);
+
+        workout.with(exerciseDetails);
+        training.attach(workout);
+        workoutRepo.save(workout);
+        trainingRepo.save(training);
+
+        exerciseDetailsRepo.save(exerciseDetails);
+
+        List<Training> all = new ArrayList<>();
+        for (Training tr : trainingRepo.findAll()) {
+            all.add(tr);
+        }
+
+        assertEquals(1, all.size());
+        assertEquals(Difficulty.EASY, all.get(0).getDifficulty());
+        assertEquals("comments", all.get(0).getComments());
+        assertEquals(startTime, all.get(0).getStartTime());
+        assertEquals(endTime, all.get(0).getEndTime());
+
+        assertEquals(1, all.get(0).getWorkouts().size());
+        Workout wout = all.get(0).getWorkouts().iterator().next();
+        assertEquals(Difficulty.NORMAL, wout.getDifficulty());
+
+        Set<ExerciseDetails> detailz = wout.getExerciseDetails();
+        assertEquals(1, detailz.size());
+        ExerciseDetails details = detailz.iterator().next();
+        assertEquals(1, details.getWeight(), 0);
+        assertEquals(2, details.getRepCount(), 0);
+        assertEquals(3, details.getDistance(), 0);
+        assertEquals(4, details.getExecutionDuration(), 0);
+        assertEquals(5, details.getDurationOfRest(), 0);
+
     }
 
 }

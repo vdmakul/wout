@@ -38,6 +38,13 @@ public class Exercise {
     protected Exercise() {
     }
 
+    public Exercise(String uniqueCode, TechnicalLevel technicalLevel, ExerciseClass exerciseClass) {
+        this.uniqueCode = uniqueCode;
+        this.name = uniqueCode;
+        this.technicalLevel = technicalLevel;
+        this.exerciseClass = exerciseClass;
+    }
+
     public Exercise(String uniqueCode, String name, TechnicalLevel technicalLevel, ExerciseClass exerciseClass) {
         this.uniqueCode = uniqueCode;
         this.name = name;

@@ -1,22 +1,74 @@
 package lv.vdm.wout.domain.training;
 
 import lv.vdm.wout.domain.Difficulty;
+import lv.vdm.wout.domain.person.Trainee;
 
+import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
+@Entity
 public class Training {
-    private List<Workout> workouts;
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Transient
+    private Trainee trainee;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "training", fetch = FetchType.EAGER) //todo fix eager
+    private Set<Workout> workouts = new HashSet<>();
+
+    @Enumerated(EnumType.STRING)
     private Difficulty difficulty;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(nullable = false)
     private Date startTime;
+
+    @Temporal(TemporalType.TIMESTAMP)
     private Date endTime;
     private String comments;
 
-    public List<Workout> getWorkouts() {
+
+    @SuppressWarnings("unused")
+    protected Training() {
+    }
+
+    public Training(Trainee trainee, Date startTime) {
+//        assert trainee != null;  //todo uncomment
+        assert startTime != null;
+        this.trainee = trainee;
+        this.startTime = startTime;
+    }
+
+    public void attach(Workout workout) {
+        workout.setTraining(this);
+        getWorkouts().add(workout);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Trainee getTrainee() {
+        return trainee;
+    }
+
+    public void setTrainee(Trainee trainee) {
+        this.trainee = trainee;
+    }
+
+    public Set<Workout> getWorkouts() {
         return workouts;
     }
 
-    public void setWorkouts(List<Workout> workouts) {
+    public void setWorkouts(Set<Workout> workouts) {
         this.workouts = workouts;
     }
 
