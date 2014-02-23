@@ -14,7 +14,8 @@ public class Training {
     @GeneratedValue
     private Long id;
 
-    @Transient
+    @ManyToOne
+    @JoinColumn(name = "trainee_id", nullable = false)
     private Trainee trainee;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "training", fetch = FetchType.EAGER) //todo fix eager
@@ -37,7 +38,7 @@ public class Training {
     }
 
     public Training(Trainee trainee, Date startTime) {
-//        assert trainee != null;  //todo uncomment
+        assert trainee != null;
         assert startTime != null;
         this.trainee = trainee;
         this.startTime = startTime;

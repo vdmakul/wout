@@ -11,6 +11,8 @@ import lv.vdm.wout.domain.exercise.Exercise;
 import lv.vdm.wout.domain.exercise.ExerciseClass;
 import lv.vdm.wout.domain.exercise.Inventory;
 import lv.vdm.wout.domain.exercise.TechnicalLevel;
+import lv.vdm.wout.domain.person.Trainee;
+import lv.vdm.wout.domain.person.Trainer;
 import lv.vdm.wout.domain.training.ExerciseDetails;
 import lv.vdm.wout.domain.training.Training;
 import lv.vdm.wout.domain.training.Workout;
@@ -52,11 +54,17 @@ public class PersistenceIntegrationTest {
     private WorkoutRepository workoutRepo;
     @Autowired
     private ExerciseDetailsRepository exerciseDetailsRepo;
+    @Autowired
+    private TraineeRepository traineeRepo;
+    @Autowired
+    private TrainerRepository trainerRepo;
 
 
     @After
     public void tearDown() throws Exception {
         //order matters
+        trainerRepo.deleteAll();
+        traineeRepo.deleteAll();
         exerciseDetailsRepo.deleteAll();
         workoutRepo.deleteAll();
         trainingRepo.deleteAll();
@@ -176,9 +184,13 @@ public class PersistenceIntegrationTest {
 
     @Test
     public void thatTrainingWorks() {
+        Trainee trainee = new Trainee("trainee");
+        traineeRepo.save(trainee);
+
         Date startTime = new Date(123456789);
         Date endTime = new Date(987654321);
-        Training training = new Training(null, startTime);
+
+        Training training = new Training(trainee, startTime);
         training.setDifficulty(Difficulty.EASY);
         training.setComments("comments");
         training.setEndTime(endTime);
@@ -228,7 +240,20 @@ public class PersistenceIntegrationTest {
         assertEquals(3, details.getDistance(), 0);
         assertEquals(4, details.getExecutionDuration(), 0);
         assertEquals(5, details.getDurationOfRest(), 0);
+    }
 
+    @Test
+    public void thatTrainersWork() {
+        Trainee trainee = new Trainee("trainee");
+        traineeRepo.save(trainee);
+
+        Trainer trainer = new Trainer("trainer");
+        trainer.mentor(trainee);
+        trainerRepo.save(trainer);
+
+        assertNotNull(traineeRepo.findOne("trainee"));
+        assertNotNull(traineeRepo.findOne("trainee").getTrainer());
+        assertEquals("trainer", traineeRepo.findOne("trainee").getTrainer().getLogin());
     }
 
 }

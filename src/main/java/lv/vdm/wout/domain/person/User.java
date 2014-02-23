@@ -1,8 +1,17 @@
 package lv.vdm.wout.domain.person;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+
+@Entity
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class User {
     protected String name;
     protected String surname;
+
+    @Id
     protected String login;
     protected String password;
 

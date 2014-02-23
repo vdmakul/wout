@@ -3,43 +3,52 @@ package lv.vdm.wout.domain.person;
 import lv.vdm.wout.domain.training.Training;
 import lv.vdm.wout.domain.training.planned.PlannedTraining;
 
-import java.util.List;
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
+@Entity
 public class Trainee extends User {
-    private Trainer mainTrainer;
-    private List<Trainer> trainers;
-    private List<Training> trainingHistory;
-    private List<PlannedTraining> plannedTrainings;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "training", fetch = FetchType.EAGER) //todo fix eager
 
-    public Trainer getMainTrainer() {
-        return mainTrainer;
+    @ManyToOne
+    @JoinColumn(name = "trainer_id", nullable = true)
+    private Trainer trainer;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "trainee", fetch = FetchType.EAGER) //todo fix eager
+    private Set<Training> trainingHistory = new HashSet<>();
+
+    @Transient
+    private Set<PlannedTraining> plannedTrainings = new HashSet<>();
+
+    protected Trainee() {
     }
 
-    public void setMainTrainer(Trainer mainTrainer) {
-        this.mainTrainer = mainTrainer;
+    public Trainee(String login) {
+        this.login = login;
     }
 
-    public List<Trainer> getTrainers() {
-        return trainers;
+    public Trainer getTrainer() {
+        return trainer;
     }
 
-    public void setTrainers(List<Trainer> trainers) {
-        this.trainers = trainers;
+    public void setTrainer(Trainer trainer) {
+        this.trainer = trainer;
     }
 
-    public List<Training> getTrainingHistory() {
+    public Set<Training> getTrainingHistory() {
         return trainingHistory;
     }
 
-    public void setTrainingHistory(List<Training> trainingHistory) {
+    public void setTrainingHistory(Set<Training> trainingHistory) {
         this.trainingHistory = trainingHistory;
     }
 
-    public List<PlannedTraining> getPlannedTrainings() {
+    public Set<PlannedTraining> getPlannedTrainings() {
         return plannedTrainings;
     }
 
-    public void setPlannedTrainings(List<PlannedTraining> plannedTrainings) {
+    public void setPlannedTrainings(Set<PlannedTraining> plannedTrainings) {
         this.plannedTrainings = plannedTrainings;
     }
 }
