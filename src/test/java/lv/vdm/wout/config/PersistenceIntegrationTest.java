@@ -16,6 +16,9 @@ import lv.vdm.wout.domain.person.Trainer;
 import lv.vdm.wout.domain.training.ExerciseDetails;
 import lv.vdm.wout.domain.training.Training;
 import lv.vdm.wout.domain.training.Workout;
+import lv.vdm.wout.domain.training.planned.PlannedExerciseDetails;
+import lv.vdm.wout.domain.training.planned.PlannedTraining;
+import lv.vdm.wout.domain.training.planned.PlannedWorkout;
 import lv.vdm.wout.repository.*;
 import org.junit.After;
 import org.junit.Test;
@@ -24,12 +27,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -58,11 +59,20 @@ public class PersistenceIntegrationTest {
     private TraineeRepository traineeRepo;
     @Autowired
     private TrainerRepository trainerRepo;
+    @Autowired
+    private PlannedTrainingRepository plannedTrainingRepo;
+    @Autowired
+    private PlannedWorkoutRepository plannedWorkoutRepo;
+    @Autowired
+    private PlannedExerciseDetailsRepository plannedExerciseDetailsRepo;
 
 
     @After
     public void tearDown() throws Exception {
         //order matters
+        plannedExerciseDetailsRepo.deleteAll();
+        plannedWorkoutRepo.deleteAll();
+        plannedTrainingRepo.deleteAll();
         trainerRepo.deleteAll();
         traineeRepo.deleteAll();
         exerciseDetailsRepo.deleteAll();
@@ -254,6 +264,31 @@ public class PersistenceIntegrationTest {
         assertNotNull(traineeRepo.findOne("trainee"));
         assertNotNull(traineeRepo.findOne("trainee").getTrainer());
         assertEquals("trainer", traineeRepo.findOne("trainee").getTrainer().getLogin());
+    }
+
+    @Test
+    public void thatPlanningWorks() {
+        PlannedTraining plannedTraining = new PlannedTraining();
+        plannedTrainingRepo.save(plannedTraining);
+
+        Exercise jogging = new Exercise("jogging", "Jogging", TechnicalLevel.NOVICE, ExerciseClass.CARDIO);
+        exerciseRepo.save(jogging);
+
+        PlannedWorkout plannedWorkout = new PlannedWorkout();
+        plannedWorkout.setExercise(jogging);
+        plannedTraining.attach(plannedWorkout);
+
+        plannedWorkoutRepo.save(plannedWorkout);
+
+        PlannedExerciseDetails plannedExerciseDetails = new PlannedExerciseDetails();
+        plannedWorkout.with(plannedExerciseDetails);
+        plannedExerciseDetailsRepo.save(plannedExerciseDetails);
+
+        Iterator<PlannedTraining> iterator = plannedTrainingRepo.findAll().iterator();
+        assertTrue(iterator.hasNext());
+        PlannedTraining training = iterator.next();
+        assertEquals(1, training.getPlannedWorkouts().size());
+        assertEquals(1, training.getPlannedWorkouts().iterator().next().getPlannedDetails().size());
     }
 
 }

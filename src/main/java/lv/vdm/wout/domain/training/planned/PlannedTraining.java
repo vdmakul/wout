@@ -1,25 +1,34 @@
 package lv.vdm.wout.domain.training.planned;
 
 import lv.vdm.wout.domain.person.Trainer;
-import lv.vdm.wout.domain.training.Training;
 
+import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
+@Entity
 public class PlannedTraining {
-    private List<PlannedWorkout> plannedWorkouts;
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "plannedTraining", fetch = FetchType.EAGER) //todo fix eager
+    private Set<PlannedWorkout> plannedWorkouts = new HashSet<>();
+
+    @Temporal(TemporalType.DATE)
     private Date plannedDate;
+
     private String comments;
 
+    @ManyToOne
+    @JoinColumn(name = "author_id", nullable = true)
     private Trainer author;
-    private Training origin;
 
-    public Training getOrigin() {
-        return origin;
-    }
-
-    public void setOrigin(Training origin) {
-        this.origin = origin;
+    public void attach(PlannedWorkout workout) {
+        workout.setPlannedTraining(this);
+        getPlannedWorkouts().add(workout);
     }
 
     public Trainer getAuthor() {
@@ -46,11 +55,11 @@ public class PlannedTraining {
         this.plannedDate = plannedDate;
     }
 
-    public List<PlannedWorkout> getPlannedWorkouts() {
+    public Set<PlannedWorkout> getPlannedWorkouts() {
         return plannedWorkouts;
     }
 
-    public void setPlannedWorkouts(List<PlannedWorkout> plannedWorkouts) {
+    public void setPlannedWorkouts(Set<PlannedWorkout> plannedWorkouts) {
         this.plannedWorkouts = plannedWorkouts;
     }
 }
