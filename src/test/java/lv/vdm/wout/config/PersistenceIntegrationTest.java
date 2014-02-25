@@ -1,6 +1,5 @@
 package lv.vdm.wout.config;
 
-import lv.vdm.wout.App;
 import lv.vdm.wout.domain.Difficulty;
 import lv.vdm.wout.domain.Media;
 import lv.vdm.wout.domain.body.BodyPart;
@@ -34,7 +33,7 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {App.class})
+@ContextConfiguration(classes = {PersistenceConfig.class})
 public class PersistenceIntegrationTest {
 
     @Autowired
