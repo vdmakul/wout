@@ -6,6 +6,11 @@ apply plugin: 'tomcat'
 sourceCompatibility = 1.7
 version = '1.0'
 
+
+configurations {
+    all*.exclude group: 'ch.qos.logback', module: 'logback-classic'
+}
+
 buildscript {
     repositories {
         maven { url "http://repo.spring.io/libs-snapshot" }
@@ -13,7 +18,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:1.0.0.RC3"
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.0.0.RC3'
         classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:1.0'
     }
 }
@@ -26,20 +31,27 @@ repositories {
 
 dependencies {
     /* Tomcat plugin dependencies */
-    def tomcatVersion = '7.0.47'
+    def tomcatVersion = '7.0.50'
     tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
             "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
     tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
         exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
     }
 
-    compile 'org.springframework:spring-core:4.0.1.RELEASE'
+    compile("org.springframework:spring-core:4.0.1.RELEASE") {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
     compile 'org.springframework.boot:spring-boot-starter-web'
     compile 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-    compile("org.springframework.boot:spring-boot-starter-actuator")
+    compile 'org.springframework.boot:spring-boot-starter-actuator'
 
     compile 'com.h2database:h2:1.3.175'
+
+    // Gradle's SLF4J bindings are visible to webapp run with the Jetty plugin
+    // http://issues.gradle.org/browse/GRADLE-897
+    compile 'org.slf4j:slf4j-api:1.7.5'
+    runtime 'org.slf4j:slf4j-log4j12:1.7.5'
 
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile 'org.springframework:spring-test:3.2.3.RELEASE'
